@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}[[ site.name ]] — [[ app_name ]]{% endblock %}
+{% block content %}
+<div class="back"><a href="/">← Back to dashboard</a></div>
+<h1>[[ site.name ]] <span class="badge [[ site.current_status ]]">[[ site.current_status ]]</span></h1>
+<p class="muted"><a href="[[ site.url ]]" target="_blank" rel="noopener">[[ site.url ]]</a> · checked every [[ site.interval_minutes ]] min{% if site.expected_status %} · expects HTTP [[ site.expected_status ]]{% endif %}</p>
+
+<div style="margin:14px 0 8px">
+  <form class="inline" method="post" action="/sites/[[ site.id ]]/check-now">
+    <button class="btn small" type="submit">Check now</button>
+  </form>
+  <form class="inline" method="post" action="/sites/[[ site.id ]]/delete" onsubmit="return confirm('Delete this site?');">
+    <button class="btn danger small" type="submit">Delete</button>
+  </form>
+</div>
+
+<div class="cards">
+  <div class="card"><div class="num">[[ stats_24h.uptime_pct|pct ]]</div><div class="label">Uptime 24h ([[ stats_24h.total ]] checks)</div></div>
+  <div class="card"><div class="num">[[ stats_7d.uptime_pct|pct ]]</div><div class="label">Uptime 7d ([[ stats_7d.total ]] checks)</div></div>
+  <div class="card"><div class="num">[[ stats_all.uptime_pct|pct ]]</div><div class="label">Uptime all time</div></div>
+  <div class="card"><div class="num">[[ stats_all.avg_response_ms|ms ]]</div><div class="label">Avg response</div></div>
+</div>
+
+<h2>Check history</h2>
+<div class="panel">
+  {% if checks %}
+  <table>
+    <thead>
+      <tr><th>Time</th><th>Result</th><th class="num">HTTP</th><th class="num">Response</th><th>Details</th></tr>
+    </thead>
+    <tbody>
+      {% for c in checks %}
+      <tr>
+        <td class="muted">[[ c.checked_at|dt ]]</td>
+        <td><span class="badge {% if c.is_up %}up{% else %}down{% endif %}">{% if c.is_up %}up{% else %}down{% endif %}</span></td>
+        <td class="num">[[ c.status_code or '—' ]]</td>
+        <td class="num">[[ c.response_time_ms|ms ]]</td>
+        <td class="muted">[[ c.error or '' ]]</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No checks recorded yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

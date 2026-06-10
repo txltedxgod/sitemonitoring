@@ -1,0 +1,14 @@
+# Web stack
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+jinja2==3.1.4
+python-multipart==0.0.12
+pydantic-settings==2.6.1
+
+# Database (async SQLite)
+SQLAlchemy[asyncio]==2.0.36
+aiosqlite==0.20.0
+
+# HTTP checks + scheduling
+httpx==0.27.2
+APScheduler==3.10.4

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Monitored sites</h1>
+
+{% if error %}<div class="error">[[ error ]]</div>{% endif %}
+{% if not telegram_enabled %}
+<div class="notice">Telegram notifications are disabled. Set <code>TELEGRAM_BOT_TOKEN</code> and <code>TELEGRAM_CHAT_ID</code> in <code>.env</code> to receive down/up alerts.</div>
+{% endif %}
+
+<div class="cards">
+  <div class="card"><div class="num">[[ total ]]</div><div class="label">Total sites</div></div>
+  <div class="card"><div class="num up">[[ up ]]</div><div class="label">Up</div></div>
+  <div class="card"><div class="num down">[[ down ]]</div><div class="label">Down</div></div>
+  <div class="card"><div class="num">[[ unknown ]]</div><div class="label">Pending</div></div>
+</div>
+
+<div class="panel">
+  <form class="add-grid" method="post" action="/sites">
+    <div class="field">
+      <label>Name</label>
+      <input type="text" name="name" placeholder="My site" />
+    </div>
+    <div class="field">
+      <label>URL *</label>
+      <input type="url" name="url" placeholder="https://example.com" required />
+    </div>
+    <div class="field">
+      <label>Every (min)</label>
+      <input type="number" name="interval_minutes" min="1" value="[[ default_interval ]]" required />
+    </div>
+    <div class="field">
+      <label>Expected code</label>
+      <input type="number" name="expected_status" min="100" max="599" placeholder="any 2xx/3xx" />
+    </div>
+    <button class="btn" type="submit">Add site</button>
+  </form>
+</div>
+
+<div class="panel">
+  {% if rows %}
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th><th>Site</th><th class="num">Interval</th>
+        <th class="num">Uptime 24h</th><th class="num">Avg resp</th>
+        <th>Last check</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      {% set s = row.site %}
+      <tr>
+        <td><span class="badge [[ s.current_status ]]">[[ s.current_status ]]</span></td>
+        <td><a href="/sites/[[ s.id ]]">[[ s.name ]]</a><br><span class="muted" style="font-size:12px">[[ s.url ]]</span></td>
+        <td class="num">[[ s.interval_minutes ]]m</td>
+        <td class="num">[[ row.uptime_24h|pct ]]</td>
+        <td class="num">[[ row.avg_response_ms|ms ]]</td>
+        <td class="muted">[[ s.last_checked_at|dt ]]</td>
+        <td class="num">
+          <form class="inline" method="post" action="/sites/[[ s.id ]]/delete" onsubmit="return confirm('Delete site?');">
+            <button class="btn danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No sites yet. Add one above to start monitoring.</div>
+  {% endif %}
+</div>
+{% endblock %}

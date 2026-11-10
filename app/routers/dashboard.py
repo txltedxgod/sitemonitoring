@@ -22,9 +22,9 @@ async def dashboard(
     down = sum(1 for r in rows if r["site"].current_status == "down")
     unknown = sum(1 for r in rows if r["site"].current_status == "unknown")
     return templates.TemplateResponse(
-        "dashboard.html",
-        {
-            "request": request,
+        request=request,
+        name="dashboard.html",
+        context={
             "rows": rows,
             "total": len(rows),
             "up": up,

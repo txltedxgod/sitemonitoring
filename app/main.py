@@ -24,9 +24,10 @@ logger = logging.getLogger("monitor")
 def _ensure_dirs() -> None:
     if settings.database_url.startswith("sqlite"):
         path = settings.database_url.split(":///")[-1]
-        parent = os.path.dirname(path)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
+        if path and path != ":memory:":
+            parent = os.path.dirname(path)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
 
 
 @asynccontextmanager
@@ -46,6 +47,12 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory="app/static"), name="static")
     app.include_router(dashboard.router)
     app.include_router(sites.router)
+
+    @app.get("/health", tags=["system"])
+    async def health() -> dict[str, str]:
+        """Liveness check endpoint."""
+        return {"status": "healthy", "version": __version__}
+
     return app
 
 

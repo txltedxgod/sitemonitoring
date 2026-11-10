@@ -1,6 +1,7 @@
 """Core monitoring logic: run due checks and fire state-change alerts."""
 from __future__ import annotations
 
+import html
 import logging
 from datetime import timedelta
 
@@ -17,15 +18,18 @@ logger = logging.getLogger("monitor.engine")
 
 
 def _format_alert(site: Site, result: CheckResult, recovered: bool) -> str:
+    safe_name = html.escape(site.name)
+    safe_url = html.escape(site.url)
     if recovered:
         return (
-            f"\u2705 <b>{site.name}</b> is back UP\n{site.url}\n"
+            f"\u2705 <b>{safe_name}</b> is back UP\n{safe_url}\n"
             f"Response: {result.response_time_ms} ms "
             f"(HTTP {result.status_code})"
         )
+    safe_error = html.escape(result.error or "unknown")
     return (
-        f"\U0001F534 <b>{site.name}</b> is DOWN\n{site.url}\n"
-        f"Reason: {result.error or 'unknown'}"
+        f"\U0001F534 <b>{safe_name}</b> is DOWN\n{safe_url}\n"
+        f"Reason: {safe_error}"
     )
 
 

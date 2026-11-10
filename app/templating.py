@@ -6,16 +6,18 @@ double-brace syntax) to avoid conflicts with the build tooling.
 from __future__ import annotations
 
 from fastapi.templating import Jinja2Templates
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app import __version__
 
-templates = Jinja2Templates(
-    directory="app/templates",
+_jinja_env = Environment(
+    loader=FileSystemLoader("app/templates"),
+    autoescape=select_autoescape(["html", "xml"]),
     variable_start_string="[[",
     variable_end_string="]]",
 )
-templates.env.globals["app_name"] = "Site Monitor"
-templates.env.globals["app_version"] = __version__
+_jinja_env.globals["app_name"] = "Site Monitor"
+_jinja_env.globals["app_version"] = __version__
 
 
 def _fmt_pct(value: float | None) -> str:
@@ -36,6 +38,8 @@ def _fmt_dt(value) -> str:
     return value.strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
-templates.env.filters["pct"] = _fmt_pct
-templates.env.filters["ms"] = _fmt_ms
-templates.env.filters["dt"] = _fmt_dt
+_jinja_env.filters["pct"] = _fmt_pct
+_jinja_env.filters["ms"] = _fmt_ms
+_jinja_env.filters["dt"] = _fmt_dt
+
+templates = Jinja2Templates(env=_jinja_env)

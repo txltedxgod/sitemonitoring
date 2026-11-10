@@ -43,7 +43,7 @@ class Site(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
-    checks: Mapped[list["Check"]] = relationship(
+    checks: Mapped[list[Check]] = relationship(
         back_populates="site",
         cascade="all, delete-orphan",
         order_by="Check.checked_at.desc()",
@@ -65,4 +65,4 @@ class Check(Base):
     response_time_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    site: Mapped["Site"] = relationship(back_populates="checks")
+    site: Mapped[Site] = relationship(back_populates="checks")

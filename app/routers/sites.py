@@ -70,9 +70,9 @@ async def site_detail(
     checks = await sites_service.recent_checks(session, site_id, limit=50)
 
     return templates.TemplateResponse(
-        "site_detail.html",
-        {
-            "request": request,
+        request=request,
+        name="site_detail.html",
+        context={
             "site": site,
             "stats_24h": stats_24h,
             "stats_7d": stats_7d,
